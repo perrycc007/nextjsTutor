@@ -22,10 +22,9 @@ router.post("/", async(req, res) => {
   if (result.status == 200);
     const user = result
     const accessToken = generateAccessToken(user)
-    res.json({ accessToken: accessToken})
   // console.log(result)
-  res.json({result})
-  if (error) return res.status(400).send(error.details[0].message);
+  res.json({ accessToken: accessToken, userID: result.userid})
+  // if (error) return res.status(400).send(error.details[0].message);
 });
   
 

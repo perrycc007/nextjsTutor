@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const router = express.Router();
 const jwt = require('jsonwebtoken')
-
+const dummyProfile = require('../DUMMY/dummyProfile')
 const {PrismaClient} = require('@prisma/client')
 const prisma = new PrismaClient()
 
@@ -14,44 +14,40 @@ router.get("/:userid", async(req, res) => {
       userid: userid ,
     },
   })  
-    if (result);
+  console.log('profile',result)
+    if (result !== null){
         console.log(result)
-        res.json({ result})
+        res.json({result})}
+    else{
+        const result = {userid: userid,...dummyProfile}
+        console.log(result)
+        res.json({result})
+    }
   })
   
-  router.patch("/", async(req, res) => {
-    const subject = req.body.subject;
-    const place = req.body.place;
-    const userid = req.body.userid;
-    const result = await prisma.profile.updateMany({
+  router.post("/", async(req, res) => {
+    const information = req.body.information
+    agreewith=information.agreewith
+    console.log(agreewith)
+    const userid = parseInt(req.body.userid);
+    const result = await prisma.profile.upsert({
         where: {
           userid: userid,
-        data: {
-          subject: subject,
-          place: place
         },
-      }
+        update: {
+          ...information,
+          agreewith: `${agreewith}`
+        },
+        create: {
+          userid:userid,
+          ...information,
+          agreewith: `${agreewith}`
+        },
+      
     }
     )
     console.log(result)
     res.json({result})
     });
- 
- 
-    router.post("/", async(req, res) => {
-      const subject = req.body.subject;
-      const place = req.body.place;
-      const userid = parseInt(req.body.userid);
-      const result = await prisma.profile.create({
-          data: {
-            subject: subject,
-            place: place,
-            userid:userid
-          },
-        }
-      )
-      console.log(result)
-      res.json({result})
-      });
 
 module.exports = router;

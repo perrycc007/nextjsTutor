@@ -5,50 +5,69 @@ const {PrismaClient} = require('@prisma/client')
 const prisma = new PrismaClient()
 
 
-router.get("/", async(req, res) => {
-  const userid = req.body.userid;
-  const result = await prisma.favourite.findMany( 
-    { where: {
-      userid:userid
-    }}
-  )
-  if (result.status == 200);
-  res.json({result})
-});
-  
-router.post("/", async(req, res) => {
-  console.log(req.body.favourites)
-  favourites = req.body.favourites
-  const result = await prisma.apply.findMany(
-    {where: {
-        idapply: {in:favourites}
+router.get("/case", async(req, res) => {
 
+  const userid = parseInt(req.body.userid);
+  const result = await prisma.user.findUnique( 
+    { where: {
+      userid:1
     }}
   )
   if (result.status == 200);
-  console.log(result)
   res.json(result)
 });
+ 
+router.get("/tutor/:userid", async(req, res) => {
+  const userid = req.params.userid
+  console.log(userid)
+  const result = await prisma.user.findUnique( 
+    { where: {
+      userid:1
+    }}
+  )
+  if (result.status == 200);
+  res.json(result)
+});
+  
 
-
-router.patch("/", async(req, res) => {
+router.patch("/case", async(req, res) => {
   const userid = parseInt(req.body.userid);
   console.log(req.body.caseid)
   const caseid = req.body.caseid
-  const result = await prisma.favourite.update({
+  const result = await prisma.user.upsert({
     where: {
       userid: userid,
       },
-      data: {
-        caseid: caseid,
+      update: {
+        favouritecaseid: caseid,
+      },
+      create: {
+        userid: userid,
+        favouritecaseid: caseid
       },
     }
   )
-  console.log(result)
+  // console.log(result)
   res.json({result})
   });
 
-
-
+  router.patch("/tutor", async(req, res) => {
+    const userid = parseInt(req.body.userid);
+    console.log(req.body.tutorid)
+    const tutorid = req.body.tutorid
+    const result = await prisma.user.update({
+      where: {
+        userid: userid,
+        },
+        data: {
+          favouritetutorid: tutorid,
+        },
+      }
+    )
+    // console.log(result)
+    res.json({result})
+    });
+  
+  
 
 module.exports = router;

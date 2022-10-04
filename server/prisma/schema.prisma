@@ -8,32 +8,96 @@ datasource db {
 }
 
 model profile {
-  idprofile Int     @id @default(autoincrement())
-  subject   String? @db.VarChar(45)
-  place     String? @db.VarChar(45)
-  userid    Int     @unique(map: "Profile_userId_key")
-  availtime String? @db.VarChar(600)
-  user      user    @relation(fields: [userid], references: [userid], map: "Profile_userId_fkey")
+  idprofile             Int     @id @default(autoincrement())
+  userid                Int     @unique(map: "Profile_userId_key")
+  availtime             String? @db.VarChar(600)
+  address               String? @db.VarChar(45)
+  agreewith             String? @db.VarChar(45)
+  country               String? @db.VarChar(45)
+  emergencycontact      String? @db.VarChar(45)
+  emergencyphone        String? @db.VarChar(45)
+  emergencyrelationship String? @db.VarChar(45)
+  findus                String? @db.VarChar(45)
+  language              String? @db.VarChar(45)
+  name                  String? @db.VarChar(45)
+  nationality           String? @db.VarChar(45)
+  phoneno               String? @db.VarChar(45)
+  user                  user    @relation(fields: [userid], references: [userid], map: "Profile_userId_fkey")
 }
 
 model user {
-  userid    Int        @id @default(autoincrement())
-  email     String     @db.VarChar(45)
-  password  String     @db.TinyText
-  favourite favourite?
-  profile   profile?
+  userid           Int      @id @default(autoincrement())
+  email            String   @db.VarChar(45)
+  password         String   @db.TinyText
+  favouritecaseid  Json?
+  favouritetutorid Json?
+  profile          profile?
+  tutor            tutor[]
+}
+
+model student {
+  studentid         Int     @id @default(autoincrement())
+  userid            Int?
+  subject           String? @db.VarChar(300)
+  availtime         String? @db.VarChar(45)
+  lowestfrequency   String? @db.VarChar(45)
+  lowestfee         String? @db.VarChar(45)
+  lowestduration    String? @db.VarChar(45)
+  language          String? @db.VarChar(45)
+  others            String? @db.VarChar(45)
+  expectation       String? @db.VarChar(45)
+  genderrequirement String? @db.VarChar(45)
+  status            String? @db.VarChar(45)
+  location          Json?
+  highestfee        String? @db.VarChar(45)
+  highestfrequency  String? @db.VarChar(45)
+  highestduration   String? @db.VarChar(45)
+  level             String? @db.VarChar(45)
 }
 
 model apply {
   idapply Int    @id @default(autoincrement())
   subject String @db.VarChar(45)
   place   String @db.VarChar(45)
-  userid  Int
+  userid  Int    @unique(map: "Apply_userId_key")
 }
 
-model favourite {
-  favouriteid Int  @id
-  caseid      Json
-  userid      Int  @unique
-  user        user @relation(fields: [userid], references: [userid], map: "Favourite_userid_fkey")
+model tutor {
+  tutorid              Int     @id @default(autoincrement())
+  userid               Int?
+  location             Json?
+  availtime            String? @db.VarChar(45)
+  intro                String? @db.VarChar(45)
+  language             String? @db.VarChar(45)
+  occupation           String? @db.VarChar(45)
+  secondaryschool      String? @db.VarChar(45)
+  primaryschool        String? @db.VarChar(45)
+  yearofexperience     String? @db.VarChar(45)
+  experience           String? @db.VarChar(45)
+  highestteachinglevel String? @db.VarChar(45)
+  educationallevel     String? @db.VarChar(45)
+  notes                String? @db.VarChar(45)
+  schoolcat            String? @db.VarChar(45)
+  year                 String? @db.VarChar(45)
+  publicexamgrade      String? @db.VarChar(45)
+  university           String? @db.VarChar(45)
+  othercert            String? @db.VarChar(45)
+  caseid               String? @db.VarChar(45)
+  major                String? @db.VarChar(45)
+  subgrade             String? @db.VarChar(2000)
+  strength             String? @db.VarChar(45)
+  fee                  String? @db.VarChar(45)
+  subject              Json?
+  user                 user?   @relation(fields: [userid], references: [userid], onDelete: Restrict, map: "tutor_userid_key")
+
+  @@index([userid], map: "tutor_userid_key_idx")
+}
+
+model match {
+  idmatch       Int     @id
+  caseid        String? @db.VarChar(45)
+  tutorid       String? @db.VarChar(45)
+  availtutor    String? @db.VarChar(45)
+  notavailtutor String? @db.VarChar(45)
+  checking      String? @db.VarChar(45)
 }
