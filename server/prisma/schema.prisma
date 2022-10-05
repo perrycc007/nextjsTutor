@@ -40,18 +40,18 @@ model student {
   userid            Int?
   subject           String? @db.VarChar(300)
   availtime         String? @db.VarChar(45)
-  lowestfrequency   String? @db.VarChar(45)
-  lowestfee         String? @db.VarChar(45)
-  lowestduration    String? @db.VarChar(45)
+  lowestfrequency   Int?
+  lowestfee         Int?
+  lowestduration    Int?
   language          String? @db.VarChar(45)
   others            String? @db.VarChar(45)
   expectation       String? @db.VarChar(45)
   genderrequirement String? @db.VarChar(45)
   status            String? @db.VarChar(45)
   location          Json?
-  highestfee        String? @db.VarChar(45)
-  highestfrequency  String? @db.VarChar(45)
-  highestduration   String? @db.VarChar(45)
+  highestfee        Int?
+  highestfrequency  Int?
+  highestduration   Int?
   level             String? @db.VarChar(45)
 }
 

@@ -10,32 +10,33 @@ const prisma = new PrismaClient()
 router.post("/tutor", async(req, res) => {
     console.log(req.body.information)
     // const {lowestfrequency,highestfrequency,location,highestteachinglevel,subject} = req.body.information
-    const {location,subject} = req.body.information
+    const {location,subject,lowestfrequency,highestfrequency} = req.body.information
     console.log('matching',req.body.information)
-  //   const preference = { 
-  //   //   highestteachinglevel:highestteachinglevel,
-  //   lowestfrequency:{
-  //       gte: lowestfrequency,
-  //     },
-  //   highestfrequency:{
-  //       lte: highestfrequency
-  //   }
-  //   }
-  //  if (highestfrequency == null){
-  //   delete preference['highestfrequency']
+    const preference = { 
+    //   highestteachinglevel:highestteachinglevel,
+    lowestfrequency:{
+        gte: lowestfrequency,
+      },
+    highestfrequency:{
+        lte: highestfrequency
+    }
+    }
+   if (highestfrequency == null){
+    delete preference['highestfrequency']
+   }
+   if (lowestfrequency == null){
+    delete preference['lowestfrequency']
+   }
+  //  if (highestteachinglevel[0] ==null){
+  //   delete preference['highestteachinglevel']
   //  }
-  //  if (lowestfrequency == null){
-  //   delete preference['lowestfrequency']
-  //  }
-//    if (highestteachinglevel[0] ==null){
-//     delete preference['highestteachinglevel']
-//    }
   
     const result = await prisma.student.findMany(
-      // {where: 
-      //   preference
-      // },
+      {where: 
+        preference
+      },
     ) 
+    console.log('match', result)
   // console.log(result)
   let found = location[0] != null? result.map((key)=>{if(JSON.parse(key.location).some((item)=> location.indexOf(item) >= 0))
                                     {return (key)}}) : result
