@@ -73,18 +73,30 @@ router.post("/tutor", async(req, res) => {
       for (people in student){
         if (people.availtutor !== null) {
           let list = JSON.parse(people.availtutor)
-        if (list.indexOf(tutorid)==0){
+          if(people.notavailtutor !== null){
+            let notavaillist = JSON.parse(people.notavailtutor)
+              return notavaillist
+          }
+        if (list.indexOf(tutorid)<0){
           list = [...list, tutorid]
-          const result = await prisma.student.update({
-          where: {
-            studentid: people.studentid
-          },
-          data: {
-            availtutor: JSON.stringify(list),
-            notavailtutor: JSON.stringify(notavaillist)
-          },
-        }
-      )}
+
+    }else if (list.indexOf(tutorid)>=0){
+        if (notavaillist.indexOf(tutorid)>0){
+          notavaillist.filter((id)=>{
+            id == tutorid
+          return notavaillist
+          })
+      }
+      }
+      const result = await prisma.student.update({
+        where: {
+          studentid: people.studentid
+        },
+        data: {
+          availtutor: JSON.stringify(list),
+          notavailtutor: JSON.stringify(notavaillist)
+        },
+      })
         }else{
           let list = JSON.parse([tutorid])
           const result = await prisma.student.update({
@@ -92,7 +104,8 @@ router.post("/tutor", async(req, res) => {
               studentid: people.studentid
             },
             data: {
-              availtutor: JSON.stringify(list)
+              availtutor: JSON.stringify(list),
+              notavailtutor: JSON.stringify([])
             },
           }
         )
