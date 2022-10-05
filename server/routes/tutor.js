@@ -112,9 +112,9 @@ router.patch("/", async(req, res) => {
   if (information.subject == undefined){
     information.subject = JSON.stringify([])
   }
-  console.log(req.body.information)
+  // console.log(req.body.information)
   const userid = parseInt(req.body.userid);
-  console.log(information)
+  // console.log(information)
   const result = await prisma.tutor.upsert({
       where: {
         tutorid: userid

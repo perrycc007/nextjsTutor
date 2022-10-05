@@ -30,9 +30,14 @@ router.get("/:userid", async(req, res) => {
           ...information
         },
       }
-    
     )
-    console.log(result)
+    const createMatch = await prisma.match.create({
+      data: {
+        studentid: studentid
+      },
+    }
+  )
+    console.log(result,createMatch)
     res.json({result})
     });
     
@@ -45,7 +50,6 @@ router.get("/:userid", async(req, res) => {
             ...information
           },
         }
-      
       )
       console.log(result)
       res.json({result})

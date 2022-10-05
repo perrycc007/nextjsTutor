@@ -11,7 +11,7 @@ router.post("/tutor", async(req, res) => {
     console.log(req.body.information)
     // const {lowestfrequency,highestfrequency,location,highestteachinglevel,subject} = req.body.information
     const {location,subject,lowestfrequency,highestfrequency} = req.body.information
-    console.log('matching',req.body.information)
+    // console.log('matching',req.body.information)
     const preference = { 
     //   highestteachinglevel:highestteachinglevel,
     lowestfrequency:{
@@ -36,14 +36,14 @@ router.post("/tutor", async(req, res) => {
         preference
       },
     ) 
-    console.log('match', result)
+    // console.log('match', result)
   // console.log(result)
   let found = location[0] != null? result.map((key)=>{if(JSON.parse(key.location).some((item)=> location.indexOf(item) >= 0))
                                     {return (key)}}) : result
   found = found.filter(function( element ) {
    return element !== undefined;
   });
-  console.log('found',found)
+  // console.log('found',found)
   let found1 =  subject[0] != null ? found.map((key)=>{if(JSON.parse(key.subject).some((item)=> subject.indexOf(item) >= 0))
                                     {return (key)}}): found
   found1 = found1.filter(function( element ) {
@@ -53,8 +53,24 @@ router.post("/tutor", async(req, res) => {
   
     try {
       // const result = JSON.parse(...s);
-    console.log('found1',found1)
+      found1 = found1.map((info)=>{
+        return info.studentid
+      })
+    // console.log('found1',found1)
     res.json(found1)
+
+
+    const student = await prisma.match.findMany(
+      {where: {
+        studentid: {
+          in: found1
+        }
+      }}
+    )
+      console.log(student)
+
+      
+
     // const upsertUser = await prisma.user.upsert({
     //     where: {
     //       email: 'viola@prisma.io',
