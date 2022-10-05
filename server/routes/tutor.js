@@ -66,13 +66,15 @@ router.post("/", async(req, res) => {
   const {fee,location,highestteachinglevel,subject} = req.body.preference
   const preference = { 
     highestteachinglevel:highestteachinglevel,
-    fee:{
-      gte: fee[0],
-      lte: fee[1]
+    lowestfee:{
+        gte: fee[0],
+      },
+    highestfee:{
+        lte: fee[1]
     }
   }
  if (fee[0] == null){
-  delete preference['fee']
+  delete preference['lowestfee','highestfee']
  }
  if (highestteachinglevel[0] ==null){
   delete preference['highestteachinglevel']

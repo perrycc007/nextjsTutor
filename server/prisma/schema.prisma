@@ -86,8 +86,9 @@ model tutor {
   major                String? @db.VarChar(45)
   subgrade             String? @db.VarChar(2000)
   strength             String? @db.VarChar(45)
-  fee                  String? @db.VarChar(45)
   subject              Json?
+  highestfee           Int?
+  lowestfee            Int?
   user                 user?   @relation(fields: [userid], references: [userid], onDelete: Restrict, map: "tutor_userid_key")
 
   @@index([userid], map: "tutor_userid_key_idx")
