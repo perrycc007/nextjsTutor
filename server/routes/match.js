@@ -10,7 +10,7 @@ const prisma = new PrismaClient()
 router.post("/tutor", async(req, res) => {
     console.log(req.body.information)
     // const {lowestfrequency,highestfrequency,location,highestteachinglevel,subject} = req.body.information
-    const {location,subject,lowestfrequency,highestfrequency} = req.body.information
+    const {location,subject,lowestfrequency,highestfrequency,tutorid} = req.body.information
     // console.log('matching',req.body.information)
     const preference = { 
     //   highestteachinglevel:highestteachinglevel,
@@ -69,7 +69,36 @@ router.post("/tutor", async(req, res) => {
     )
       console.log(student)
 
-      
+
+      for (people in student){
+        if (people.availtutor !== null) {
+          let list = JSON.parse(people.availtutor)
+        if (list.indexOf(tutorid)==0){
+          list = [...list, tutorid]
+          const result = await prisma.student.update({
+          where: {
+            studentid: people.studentid
+          },
+          data: {
+            availtutor: JSON.stringify(list),
+            notavailtutor: JSON.stringify(notavaillist)
+          },
+        }
+      )}
+        }else{
+          let list = JSON.parse([tutorid])
+          const result = await prisma.student.update({
+            where: {
+              studentid: people.studentid
+            },
+            data: {
+              availtutor: JSON.stringify(list)
+            },
+          }
+        )
+        }
+      }
+
 
     // const upsertUser = await prisma.user.upsert({
     //     where: {
