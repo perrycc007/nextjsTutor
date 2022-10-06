@@ -8,7 +8,7 @@ const prisma = new PrismaClient()
 
 
 router.post("/tutor", async(req, res) => {
-    console.log(req.body.information)
+    // console.log(req.body.information)
     // const {lowestfrequency,highestfrequency,location,highestteachinglevel,subject} = req.body.information
     const {location,subject,lowestfrequency,highestfrequency,tutorid} = req.body.information
     // console.log('matching',req.body.information)
@@ -69,74 +69,63 @@ router.post("/tutor", async(req, res) => {
     )
       console.log(student)
 
-
-      for (people in student){
+const updateServer = async() => {     
+   for(const people of student){
+        console.log(people.studentid)
         if (people.availtutor !== null) {
-          let list = JSON.parse(people.availtutor)
-          if(people.notavailtutor !== null){
-            let notavaillist = JSON.parse(people.notavailtutor)
-              return notavaillist
+            let list = people.availtutor 
+            let notavaillist = []
+
+
+            if(people.notavailtutor !== null){
+              notavaillist = people.notavailtutor
+            }
+            if (list.indexOf(tutorid)<0){
+              list = [...list, tutorid]
+            }else if (list.indexOf(tutorid)>=0){
+              if (notavaillist.indexOf(tutorid)>=0){
+                notavaillist = notavaillist.filter((id)=>{
+                  id !== tutorid
+                })
           }
-        if (list.indexOf(tutorid)<0){
-          list = [...list, tutorid]
-
-    }else if (list.indexOf(tutorid)>=0){
-        if (notavaillist.indexOf(tutorid)>0){
-          notavaillist.filter((id)=>{
-            id == tutorid
-          return notavaillist
-          })
-      }
-      }
-      const result = await prisma.student.update({
-        where: {
-          studentid: people.studentid
-        },
-        data: {
-          availtutor: JSON.stringify(list),
-          notavailtutor: JSON.stringify(notavaillist)
-        },
-      })
-        }else{
-          let list = JSON.parse([tutorid])
-          const result = await prisma.student.update({
-            where: {
-              studentid: people.studentid
-            },
-            data: {
-              availtutor: JSON.stringify(list),
-              notavailtutor: JSON.stringify([])
-            },
           }
-        )
-        }
+            console.log('92',notavaillist)
+        const result =  await prisma.match.update({
+          where: {
+            idmatch: people.idmatch
+          },
+          data: {
+            availtutor: list,
+            notavailtutor: notavaillist
+          },
+        })
+        console.log(result)
+          }else{
+            console.log(people.studentid)
+            let list = [tutorid]
+            console.log('105',list)
+            const result = await prisma.match.update({
+              where: {
+                idmatch: people.idmatch
+              },
+              data: {
+                availtutor: list,
+                notavailtutor: []
+              },
+            }
+          )
+          console.log(result)
+          }
       }
-
-
-    // const upsertUser = await prisma.user.upsert({
-    //     where: {
-    //       email: 'viola@prisma.io',
-    //     },
-    //     update: {
-    //       name: 'Viola the Magnificent',
-    //     },
-    //     create: {
-    //       email: 'viola@prisma.io',
-    //       name: 'Viola the Magnificent',
-    //     },
-    //   })
-
-
-
-
-
-    } catch (err) {
+    }
+    updateServer()
+  } catch (err) {
       // 👇️ This runs
       console.log('Error: ', err.message);
-      res.json( err.message)
+      // res.json( err.message)
     }
   
-  
+    
   });
 
  
