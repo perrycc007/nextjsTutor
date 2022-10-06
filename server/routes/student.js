@@ -31,9 +31,14 @@ router.get("/:userid", async(req, res) => {
         },
       }
     )
-    const createMatch = await prisma.match.create({
-      data: {
+    const createMatch = await prisma.match.upsert({
+      where: {
         studentid: studentid
+      },
+      update: {
+      },
+      create: {
+        studentid:studentid,
       },
     }
   )
