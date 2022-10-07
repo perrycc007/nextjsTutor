@@ -58,8 +58,47 @@ router.post("/tutor", async(req, res) => {
       })
     // console.log('found1',found1)
     res.json(found1)
+      console.log('61',found1)
+    const before = await prisma.tutor.findUnique(
+      {where:{
+        tutorid: tutorid
+      }
+      }
+    )
 
-
+let difference = before.matchedbefore.filter(x => found1.indexOf(x) === -1);
+console.log('difference',difference);
+const deletetutor = await prisma.match.findMany(
+  {where: {
+    studentid: {
+      in: difference
+    }
+  }}
+)
+for(const people of deletetutor){
+  const availtutor = people.availtutor
+  console.log('availtutor',availtutor)
+  let notavaillist = []
+  let list = availtutor.filter((tutor)=> tutor !== tutorid)
+  console.log('list',list)
+  if(people.notavailtutor !== null){
+    notavaillist = people.notavailtutor
+  }
+  notavaillist = notavaillist.filter((id)=>{
+    id !== tutorid
+  })
+  const result = await prisma.match.update({
+    where: {
+      idmatch: people.idmatch
+    },
+    data: {
+      availtutor: list,
+      notavailtutor: notavaillist
+    },
+  }
+)
+console.log('result',result)
+}
     const student = await prisma.match.findMany(
       {where: {
         studentid: {
@@ -68,6 +107,17 @@ router.post("/tutor", async(req, res) => {
       }}
     )
       console.log(student)
+      const result = await prisma.tutor.update({
+        where: {
+          tutorid: tutorid
+        },
+        data: {
+          matchedbefore: found1
+        },
+      }
+    
+    )
+    console.log(result)
 
 const updateServer = async() => {     
    for(const people of student){
