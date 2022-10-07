@@ -65,8 +65,10 @@ router.post("/tutor", async(req, res) => {
       }
       }
     )
-
-let difference = before.matchedbefore.filter(x => found1.indexOf(x) === -1);
+    let difference = []
+if (before.matchedbefore !==null){
+   difference = before.matchedbefore.filter(x => found1.indexOf(x) === -1);
+}
 console.log('difference',difference);
 const deletetutor = await prisma.match.findMany(
   {where: {
