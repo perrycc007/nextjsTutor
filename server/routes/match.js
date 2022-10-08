@@ -38,13 +38,13 @@ router.post("/tutor", async(req, res) => {
     ) 
     // console.log('match', result)
   // console.log(result)
-  let found = location[0] != null? result.map((key)=>{if(JSON.parse(key.location).some((item)=> location.indexOf(item) >= 0))
+  let found = location != undefined? result.map((key)=>{if(JSON.parse(key.location).some((item)=> location.indexOf(item) >= 0))
                                     {return (key)}}) : result
   found = found.filter(function( element ) {
    return element !== undefined;
   });
   // console.log('found',found)
-  let found1 =  subject[0] != null ? found.map((key)=>{if(JSON.parse(key.subject).some((item)=> subject.indexOf(item) >= 0))
+  let found1 =  subject != undefined ? found.map((key)=>{if(JSON.parse(key.subject).some((item)=> subject.indexOf(item) >= 0))
                                     {return (key)}}): found
   found1 = found1.filter(function( element ) {
     return element !== undefined;
@@ -172,9 +172,7 @@ const updateServer = async() => {
     }
     updateServer()
   } catch (err) {
-      // 👇️ This runs
       console.log('Error: ', err.message);
-      // res.json( err.message)
     }
   
     
@@ -182,8 +180,10 @@ const updateServer = async() => {
 
  router.post("/student", async(req, res) => {
   // Find Match using student's criteria on the tutor criteria
-    const {location,subject,lowestfrequency,highestfrequency,studentid} = req.body.information
-    // console.log('matching',req.body.information)
+    const {location,subject,lowestfrequency,highestfrequency} = req.body.information
+    const studentid = req.body.studentid
+    console.log('matching',req.body.information)
+    console.log('studentid',studentid)
     const preference = { 
     //   highestteachinglevel:highestteachinglevel,
     lowestfrequency:{
@@ -210,13 +210,13 @@ const updateServer = async() => {
     ) 
     // console.log('match', result)
   // console.log(result)
-  let found = location[0] != null? result.map((key)=>{if(JSON.parse(key.location).some((item)=> location.indexOf(item) >= 0))
+  let found = location != undefined? result.map((key)=>{if(JSON.parse(key.location).some((item)=> location.indexOf(item) >= 0))
                                     {return (key)}}) : result
   found = found.filter(function( element ) {
    return element !== undefined;
   });
   // console.log('found',found)
-  let found1 =  subject[0] != null ? found.map((key)=>{if(JSON.parse(key.subject).some((item)=> subject.indexOf(item) >= 0))
+  let found1 =  subject != undefined ? found.map((key)=>{if(JSON.parse(key.subject).some((item)=> subject.indexOf(item) >= 0))
                                     {return (key)}}): found
   found1 = found1.filter(function( element ) {
     return element !== undefined;
@@ -235,15 +235,26 @@ const updateServer = async() => {
 // Find the previous match of the student
     const student = await prisma.match.findUnique(
       {where: {
-        studentid: studentid
+        studentid: parseInt(studentid)
       }}
     )
       console.log('241',student)
 let beforeavailtutor = student.availtutor
 let difference = []
+let differenceToAdd = []
 if (beforeavailtutor !==null){
    difference = beforeavailtutor.filter(x => found1.indexOf(x) === -1);
 }
+differenceToAdd = found1.filter(x => beforeavailtutor.indexOf(x) === -1);
+console.log('differenceToAdd',differenceToAdd)
+//  find those tutor who are a new match
+const updateTutor = await prisma.tutor.findMany(
+  {where: {
+    tutorid: {
+      in: differenceToAdd
+    }
+  }}
+)
 
 // find those tutor who are a matched but no longer is a match now
 const deletetutor = await prisma.tutor.findMany(
@@ -253,14 +264,35 @@ const deletetutor = await prisma.tutor.findMany(
     }
   }}
 )
+console.log('deletetutor',deletetutor)
 // delete the studentid in there matchedbefore list 
 const updateServer = async() => {     
   for(const people of deletetutor){
-
-    console.log('matchedbefore',matchedbefore)
     let matchedbefore = people.matchedbefore
-    let list = matchedbefore.filter((student)=> student !== studentid)
-    console.log('list',list)
+    console.log('matchedbefore',matchedbefore)
+    let list = []
+    if (matchedbefore !== null){
+    list = matchedbefore.filter((student)=> student !== studentid)
+    console.log('list',list)}
+    const result = await prisma.tutor.update({
+      where: {
+        tutorid: people.tutorid
+      },
+      data: {
+        matchedbefore: list,
+      },
+    }
+  )
+  console.log('result',result)
+  }
+  for(const people of updateTutor){
+    let matchedbefore = []
+    matchedbefore = people.matchedbefore
+    console.log('matchedbefore',matchedbefore)
+    let list = []
+    if (matchedbefore !== null && matchedbefore !== []){
+    list.push(studentid)
+    console.log('list',list)}
     const result = await prisma.tutor.update({
       where: {
         tutorid: people.tutorid
@@ -277,8 +309,9 @@ const updateServer = async() => {
 // update the match list with the new avail list and delete its name in the notavailtutor
       let availtutor = []
       availtutor = found1
-      let notavaillist = []
-      notavaillist = student.notavailtutor
+
+      let notavailtutor = []
+      student.notavailtutor!== null ? notavailtutor = student.notavailtutor: []
 
       const result = await prisma.match.update({
         where: {
@@ -286,12 +319,14 @@ const updateServer = async() => {
         },
         data: {
           availtutor: found1,
-          notavaillist: notavaillist
+          notavailtutor: notavailtutor
         },
       }
     
     )
     console.log(result)
+
+// update the tutor matched list for adding
 
 
   } catch (err) {
