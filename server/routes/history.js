@@ -13,7 +13,7 @@ router.get("/:userid", async(req, res) => {
     console.log(userid)
     const result = await prisma.student.findMany(
         { where: {
-            userid:1
+            userid: parseInt(userid)
           }
         }
   )

@@ -43,9 +43,16 @@ router.post("/tutor", async(req, res) => {
   found = found.filter(function( element ) {
    return element !== undefined;
   });
-  // console.log('found',found)
-  let found1 =  subject != undefined ? found.map((key)=>{if(JSON.parse(key.subject).some((item)=> subject.indexOf(item) >= 0))
-                                    {return (key)}}): found
+  console.log('found',found)
+  let found1 = found
+  if(found !==[] && found!==undefined){
+  found1 =  subject != undefined ? found.map((key)=>{
+      if(JSON.parse(key.subject) !==[] && JSON.parse(key.subject) !== null){
+          if(JSON.parse(key.subject).some((item)=> subject.indexOf(item) >= 0))
+              {return (key)}}
+                                  }): found
+  }
+
   found1 = found1.filter(function( element ) {
     return element !== undefined;
     });
@@ -180,24 +187,24 @@ const updateServer = async() => {
 
  router.post("/student", async(req, res) => {
   // Find Match using student's criteria on the tutor criteria
-    const {location,subject,lowestfrequency,highestfrequency} = req.body.information
+    const {location,subject,lowestfee,highestfee} = req.body.information
     const studentid = req.body.studentid
     console.log('matching',req.body.information)
     console.log('studentid',studentid)
     const preference = { 
     //   highestteachinglevel:highestteachinglevel,
-    lowestfrequency:{
-        gte: lowestfrequency,
+    lowestfee:{
+        gte: lowestfee,
       },
-    highestfrequency:{
-        lte: highestfrequency
+      highestfee:{
+        lte: highestfee
     }
     }
-   if (highestfrequency == null){
-    delete preference['highestfrequency']
+   if (highestfee == null){
+    delete preference['highestfee']
    }
-   if (lowestfrequency == null){
-    delete preference['lowestfrequency']
+   if (lowestfee == null){
+    delete preference['lowestfee']
    }
   //  if (highestteachinglevel[0] ==null){
   //   delete preference['highestteachinglevel']
