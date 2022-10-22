@@ -10,6 +10,7 @@ const student = require("./routes/student");
 const favourite = require("./routes/favourite")
 const history = require("./routes/history")
 const match = require("./routes/match")
+const result = require("./routes/result")
 const forgetPassword = require("./routes/forgetPassword")
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/favourite", favourite);
 app.use("/history", history);
 app.use("/forgetPassword", forgetPassword);
 app.use("/match", match);
+app.use("/result", result);
 
 const port = process.env.PORT || 3001;
 

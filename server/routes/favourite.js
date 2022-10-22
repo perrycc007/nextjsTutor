@@ -10,7 +10,7 @@ router.get("/case", async(req, res) => {
   const userid = parseInt(req.body.userid);
   const result = await prisma.user.findUnique( 
     { where: {
-      userid:1
+      userid: userid
     }}
   )
   if (result.status == 200);
@@ -22,7 +22,7 @@ router.get("/tutor/:userid", async(req, res) => {
   console.log(userid)
   const result = await prisma.user.findUnique( 
     { where: {
-      userid:1
+      userid: userid
     }}
   )
   if (result.status == 200);
