@@ -18,7 +18,7 @@ router.get("/case", async(req, res) => {
 });
  
 router.get("/tutor/:userid", async(req, res) => {
-  const userid = req.params.userid
+  const userid = parseInt(req.params.userid)
   console.log(userid)
   const result = await prisma.user.findUnique( 
     { where: {
@@ -32,8 +32,8 @@ router.get("/tutor/:userid", async(req, res) => {
 
 router.patch("/case", async(req, res) => {
   const userid = parseInt(req.body.userid);
-  console.log(req.body.caseid)
   const caseid = req.body.caseid
+  console.log(req.body.caseid)
   const result = await prisma.user.upsert({
     where: {
       userid: userid,
@@ -53,14 +53,13 @@ router.patch("/case", async(req, res) => {
 
   router.patch("/tutor", async(req, res) => {
     const userid = parseInt(req.body.userid);
-    console.log(req.body.tutorid)
-    const tutorid = req.body.tutorid
+    const caseid = req.body.caseid
     const result = await prisma.user.update({
       where: {
         userid: userid,
         },
         data: {
-          favouritetutorid: tutorid,
+          favouritetutorid: caseid,
         },
       }
     )
