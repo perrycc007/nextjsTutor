@@ -29,21 +29,29 @@ router.get("/tutor/:userid", async(req, res) => {
   res.json(result)
 });
   
+router.get("/cases/:userid", async(req, res) => {
+  const userid = parseInt(req.params.userid)
+  console.log(userid)
+  const result = await prisma.user.findUnique( 
+    { where: {
+      userid: userid
+    }}
+  )
+  if (result.status == 200);
+  res.json(result)
+});
 
 router.patch("/case", async(req, res) => {
   const userid = parseInt(req.body.userid);
-  const caseid = req.body.caseid
+  let caseid = req.body.caseid
+  caseid = caseid.filter((item)=> item != null )
   console.log(req.body.caseid)
-  const result = await prisma.user.upsert({
+  const result = await prisma.user.update({
     where: {
       userid: userid,
       },
-      update: {
+      data: {
         favouritecaseid: caseid,
-      },
-      create: {
-        userid: userid,
-        favouritecaseid: caseid
       },
     }
   )
@@ -53,7 +61,8 @@ router.patch("/case", async(req, res) => {
 
   router.patch("/tutor", async(req, res) => {
     const userid = parseInt(req.body.userid);
-    const caseid = req.body.caseid
+    let caseid = req.body.caseid
+    caseid = caseid.filter((item)=> item != null )
     const result = await prisma.user.update({
       where: {
         userid: userid,

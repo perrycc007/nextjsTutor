@@ -12,11 +12,7 @@ const prisma = new PrismaClient()
 // GET /tasks?limit=10&skip=20
 // GET /tasks?sortBy=createdAt:desc
 router.get("/", async(req, res) => {
-  const tutorCount = await prisma.tutor.count()
-  // console.log(tutorCount)
   const result = await prisma.tutor.findMany({
-    take: parseInt(req.query.limit),
-    skip: parseInt(req.query.skip)
   })
   if (result.status == 200);
 try {
@@ -68,10 +64,7 @@ router.post("/", async(req, res) => {
     highestteachinglevel:highestteachinglevel,
     lowestfee:{
         gte: fee[0],
-      },
-    highestfee:{
-        lte: fee[1]
-    }
+      }
   }
  if (fee[0] == null){
   delete preference['lowestfee','highestfee']
@@ -85,10 +78,12 @@ router.post("/", async(req, res) => {
       preference
     },
   ) 
-
-const found = location[0] != null? result.map((key)=>{if(JSON.parse(key.location).some((item)=> location.indexOf(item) >= 0))
+  
+let found = location[0] != null? result.map((key)=>{if(JSON.parse(key.location).some((item)=> location.indexOf(item) >= 0))
                                   {return (key)}}) : result
-const found1 =  subject[0] != null ? found.map((key)=>{if(JSON.parse(key.subject).some((item)=> subject.indexOf(item) >= 0))
+console.log(found)
+found = found.filter((item)=> item != null)
+let found1 =  subject[0] != null ? found.map((key)=>{if(JSON.parse(key.subject).some((item)=> subject.indexOf(item) >= 0))
                                   {return (key)}}): found
 
 
@@ -96,6 +91,7 @@ const found1 =  subject[0] != null ? found.map((key)=>{if(JSON.parse(key.subject
   try {
     // const result = JSON.parse(...s);
   // console.log(found1)
+  found1 = found1.filter((item)=> item != null)
   res.json(found1)
   } catch (err) {
     // 👇️ This runs
