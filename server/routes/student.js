@@ -38,7 +38,8 @@ router.patch("/", async (req, res) => {
       studentid: studentid,
     },
   });
-  console.log(result, createMatch);
+  createMatch
+  console.log(result);
   res.json({ result });
 });
 

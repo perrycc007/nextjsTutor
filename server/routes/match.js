@@ -9,21 +9,21 @@ const prisma = new PrismaClient();
 // matching system when someone post or change their tutor profile
 router.post("/tutor", async (req, res) => {
   // getting those which can be filtered from database out
-  const { location, subject, lowestfrequency, highestfrequency, tutorid } =
+  const { location, subject, lowestfee, highestfrequency, tutorid } =
     req.body.information;
   const preference = {
     lowestfrequency: {
-      gte: lowestfrequency,
-    },
-    highestfrequency: {
       lte: highestfrequency,
+    },
+    highestfee: {
+      gte: lowestfee,
     },
   };
   if (highestfrequency == null) {
-    delete preference["highestfrequency"];
-  }
-  if (lowestfrequency == null) {
     delete preference["lowestfrequency"];
+  }
+  if (lowestfee == null) {
+    delete preference["highestfee"];
   }
   // do the query
   const result = await prisma.student.findMany({ where: preference });
@@ -213,22 +213,20 @@ router.post("/tutor", async (req, res) => {
 // the matching systmem when a student apply for a case
 router.post("/student", async (req, res) => {
   // Find Match using student's criteria on the tutor criteria
-  const { location, subject, lowestfee, highestfee } = req.body.information;
+  const { location, subject, lowestfrequency, highestfee } =
+    req.body.information;
   const studentid = req.body.studentid;
   console.log("matching", req.body.information);
   console.log("studentid", studentid);
   const preference = {
     lowestfee: {
-      gte: lowestfee,
-    },
-    highestfee: {
       lte: highestfee,
+    },
+    highestfrequency: {
+      gte: lowestfrequency,
     },
   };
   if (highestfee == null) {
-    delete preference["highestfee"];
-  }
-  if (lowestfee == null) {
     delete preference["lowestfee"];
   }
 
@@ -354,10 +352,11 @@ router.post("/student", async (req, res) => {
 
     // update the match list with the new avail list and delete its name in the notavailtutor
     let notavailtutor = [];
-    if(student !=[]){
-    student.notavailtutor !== null
-      ? (notavailtutor = student.notavailtutor)
-      : [];}
+    if (student != []) {
+      student.notavailtutor !== null
+        ? (notavailtutor = student.notavailtutor)
+        : [];
+    }
 
     const result = await prisma.match.update({
       where: {
