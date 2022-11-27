@@ -9,19 +9,13 @@ const prisma = new PrismaClient();
 // matching system when someone post or change their tutor profile
 router.post("/tutor", async (req, res) => {
   // getting those which can be filtered from database out
-  const { location, subject, lowestfee, highestfrequency, tutorid } =
-    req.body.information;
+  const { location, subject, lowestfee, tutorid } = req.body.information;
   const preference = {
-    lowestfrequency: {
-      lte: highestfrequency,
-    },
     highestfee: {
       gte: lowestfee,
     },
   };
-  if (highestfrequency == null) {
-    delete preference["lowestfrequency"];
-  }
+
   if (lowestfee == null) {
     delete preference["highestfee"];
   }
@@ -213,17 +207,13 @@ router.post("/tutor", async (req, res) => {
 // the matching systmem when a student apply for a case
 router.post("/student", async (req, res) => {
   // Find Match using student's criteria on the tutor criteria
-  const { location, subject, lowestfrequency, highestfee } =
-    req.body.information;
+  const { location, subject, highestfee } = req.body.information;
   const studentid = req.body.studentid;
   console.log("matching", req.body.information);
   console.log("studentid", studentid);
   const preference = {
     lowestfee: {
       lte: highestfee,
-    },
-    highestfrequency: {
-      gte: lowestfrequency,
     },
   };
   if (highestfee == null) {
