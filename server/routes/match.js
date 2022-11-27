@@ -324,7 +324,7 @@ router.post("/student", async (req, res) => {
       let matchedbefore = [];
       matchedbefore = people.matchedbefore;
       console.log("matchedbefore", matchedbefore);
-      let list = [];
+      let list = [...matchedbefore];
       if (matchedbefore !== null && matchedbefore !== []) {
         list.push(studentid);
         console.log("list", list);
