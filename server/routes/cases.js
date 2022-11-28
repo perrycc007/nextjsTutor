@@ -23,7 +23,7 @@ router.post("/getFavouriteCase/:userid", async (req, res) => {
     },
   });
   const caseidList = favourite ? favourite.favouritecaseid : [];
-  const result = await prisma.tutor.findMany({
+  const result = await prisma.student.findMany({
     where: {
       studentid: { in: caseidList },
     },
