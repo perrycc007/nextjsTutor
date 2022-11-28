@@ -1,30 +1,40 @@
 const bcrypt = require("bcrypt");
 const express = require("express");
 const router = express.Router();
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
 
-const {PrismaClient} = require('@prisma/client')
-const prisma = new PrismaClient()
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
-
-router.get("/:userid", async(req, res) => {
- 
-    const userid = req.params.userid
-    console.log(userid)
-    const result = await prisma.student.findMany(
-        { where: {
-            userid: parseInt(userid)
-          }
-        }
-  )
+router.get("/:userid", async (req, res) => {
+  const userid = req.params.userid;
+  console.log(userid);
+  const result = await prisma.student.findMany({
+    where: {
+      userid: parseInt(userid),
+    },
+  });
   if (result.status == 200);
-
 
   // console.log(result[0].location)
   // console.log(result)
-  res.json({result})
+  res.json({ result });
 });
-  
 
+router.patch("/updateCaseStatus", async (req, res) => {
+  console.log(req.params.studentid);
+  const studentid = req.body.studentid;
+  const status = req.body.status;
+  const result = await prisma.student.update({
+    where: {
+      studentid: parseInt(studentid),
+    },
+    data: {
+      status: status,
+    },
+  });
+  if (result.status == 200);
+  res.json({ result });
+});
 
 module.exports = router;
