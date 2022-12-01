@@ -7,16 +7,28 @@ const prisma = new PrismaClient();
 router.patch("/toggleCheck", async (req, res) => {
   const result = await prisma.match.update({
     where: {
-        idmatch: req.body.idmatch,
-      },
-      data: {
-        checking: req.body.checking,
-        checked: req.body.checked
-      },
-    }
-  )
+      idmatch: req.body.idmatch,
+    },
+    data: {
+      checking: req.body.checking,
+      checked: req.body.checked,
+    },
+  });
   // console.log(result)
-  res.json({result})
+  res.json({ result });
+});
+
+router.patch("/toggleAvail", async (req, res) => {
+  const result = await prisma.match.update({
+    where: {
+      idmatch: req.body.idmatch,
+    },
+    data: {
+      notavailtutor: req.body.notavailtutor,
+    },
+  });
+  // console.log(result)
+  res.json({ result });
 });
 
 module.exports = router;
