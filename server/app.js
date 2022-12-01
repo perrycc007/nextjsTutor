@@ -12,6 +12,7 @@ const history = require("./routes/history")
 const match = require("./routes/match")
 const result = require("./routes/result")
 const forgetPassword = require("./routes/forgetPassword")
+const admin = require("./routes/admin")
 const app = express();
 
 require("dotenv").config();
@@ -31,6 +32,7 @@ app.use("/history", history);
 app.use("/forgetPassword", forgetPassword);
 app.use("/match", match);
 app.use("/result", result);
+app.use("/admin", admin);
 
 const port = process.env.PORT || 3001;
 
