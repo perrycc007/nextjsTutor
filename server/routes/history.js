@@ -22,7 +22,7 @@ router.get("/:userid", async (req, res) => {
 });
 
 router.patch("/updateCaseStatus", async (req, res) => {
-  console.log(req.params.studentid);
+  console.log(req.body.studentid);
   const studentid = req.body.studentid;
   const status = req.body.status;
   const result = await prisma.student.update({
@@ -38,3 +38,19 @@ router.patch("/updateCaseStatus", async (req, res) => {
 });
 
 module.exports = router;
+
+router.patch("/updateTutorStatus", async (req, res) => {
+  console.log(req.body.tutorid);
+  const tutorid = req.body.tutorid;
+  const status = req.body.status;
+  const result = await prisma.tutor.update({
+    where: {
+      tutorid: parseInt(tutorid),
+    },
+    data: {
+      status: status,
+    },
+  });
+  if (result.status == 200);
+  res.json({ result });
+});
