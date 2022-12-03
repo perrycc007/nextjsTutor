@@ -90,6 +90,7 @@ model tutor {
   highestfee           Int?
   lowestfee            Int?
   matchedbefore        Json?
+  status               String? @db.VarChar(45)
   user                 user?   @relation(fields: [userid], references: [userid], onDelete: Restrict, map: "tutor_userid_key")
 
   @@index([userid], map: "tutor_userid_key_idx")
