@@ -131,9 +131,4 @@ router.patch("/", async (req, res) => {
   res.json({ result });
 });
 
-
-
-module.exports = router;
-
-
 module.exports = router;
