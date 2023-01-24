@@ -60,28 +60,24 @@ router.post("/", async (req, res) => {
 
   const result = await prisma.tutor.findMany({ where: preference });
 
-  let found =
-    location[0] != null
-      ? result.map((key) => {
-          if (
-            JSON.parse(key.location).some((item) => location.indexOf(item) >= 0)
-          ) {
-            return key;
-          }
-        })
-      : result;
-  console.log(found);
-  found = found.filter((item) => item != null);
-  let found1 =
-    subject[0] != null
-      ? found.map((key) => {
-          if (
-            JSON.parse(key.subject).some((item) => subject.indexOf(item) >= 0)
-          ) {
-            return key;
-          }
-        })
-      : found;
+  const filteringFunction = (filterCriteria, inputList) => {
+    let result =
+      filterCriteria[0] != null
+        ? inputList.map((key) => {
+            if (
+              JSON.parse(key.location).some(
+                (item) => filterCriteria.indexOf(item) >= 0
+              )
+            ) {
+              return key;
+            }
+          })
+        : inputList;
+    return result;
+  };
+
+  const found = filteringFunction(location, result);
+  const found1 = filteringFunction(subject, found);
 
   try {
     // const result = JSON.parse(...s);
