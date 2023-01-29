@@ -21,12 +21,14 @@ router.get("/:userid", async (req, res) => {
 router.patch("/", async (req, res) => {
   const information = req.body.information;
   const studentid = parseInt(req.body.studentid);
+  let date_ob = new Date();
   const result = await prisma.student.update({
     where: {
       studentid: studentid,
     },
     data: {
       ...information,
+      lastOnline: date_ob,
     },
   });
   const createMatch = await prisma.match.upsert({
@@ -46,10 +48,12 @@ router.patch("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const information = req.body.information;
   const userid = parseInt(req.body.userid);
+  let date_ob = new Date();
   const result = await prisma.student.create({
     data: {
       userid: userid,
       ...information,
+      lastOnline: date_ob
     },
   });
   console.log(result);

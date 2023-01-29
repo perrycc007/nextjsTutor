@@ -7,7 +7,13 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 router.get("/", async (req, res) => {
-  const result = await prisma.student.findMany();
+  const result = await prisma.student.findMany({
+    orderBy: [
+      {
+        lastOnline: "desc",
+      },
+    ],
+  });
   if (result.status == 200);
   try {
     res.json({ result });
@@ -58,7 +64,14 @@ router.post("/", async (req, res) => {
     delete preference["highestteachinglevel"];
   }
 
-  const result = await prisma.tutor.findMany({ where: preference });
+  const result = await prisma.tutor.findMany({
+    orderBy: [
+      {
+        lastOnline: "desc",
+      },
+    ],
+    where: preference,
+  });
 
   const filteringFunction = (filterCriteria, inputList) => {
     let result =

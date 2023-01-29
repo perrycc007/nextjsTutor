@@ -11,7 +11,13 @@ const prisma = new PrismaClient();
 // GET /tasks?limit=10&skip=20
 // GET /tasks?sortBy=createdAt:desc
 router.get("/", async (req, res) => {
-  const result = await prisma.tutor.findMany({});
+  const result = await prisma.tutor.findMany({
+    orderBy: [
+      {
+        lastOnline: "desc",
+      },
+    ],
+  });
   if (result.status == 200);
   try {
     res.json({ result });
@@ -29,6 +35,11 @@ router.post("/getFavouriteCase/:userid", async (req, res) => {
   });
   const tutoridList = favourite ? favourite.favouritetutorid : [];
   const result = await prisma.tutor.findMany({
+    orderBy: [
+      {
+        lastOnline: "desc",
+      },
+    ],
     where: {
       tutorid: { in: tutoridList },
     },
@@ -115,16 +126,19 @@ router.patch("/", async (req, res) => {
   // console.log(req.body.information)
   const userid = parseInt(req.body.userid);
   // console.log(information)
+  let date_ob = new Date();
   const result = await prisma.tutor.upsert({
     where: {
       tutorid: userid,
     },
     update: {
       ...information,
+      lastOnline: date_ob,
     },
     create: {
       userid: userid,
       ...information,
+      lastOnline: date_ob,
     },
   });
   // console.log(result)
