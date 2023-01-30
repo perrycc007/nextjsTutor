@@ -30,17 +30,20 @@ router.post("/", async (req, res) => {
   agreewith = information.agreewith;
   console.log(reqUserid);
   // userid = parseInt(req.body.userid);
+  let date_ob = new Date();
   const result = await prisma.profile.upsert({
     where: {
       userid: reqUserid,
     },
     update: {
       ...information,
+      lastOnline: date_ob,
       // agreewith: `${agreewith}`,
     },
     create: {
       userid: reqUserid,
       ...information,
+      lastOnline: date_ob,
       agreewith: `${agreewith}`,
     },
   });
