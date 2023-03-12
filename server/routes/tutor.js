@@ -56,7 +56,7 @@ router.get("/:userid", async (req, res) => {
   });
   // console.log('tutor',result)
   if (result !== null) {
-    // console.log(result)
+    console.log(result)
     res.json({ result });
   } else {
     const result = { userid: userid, ...dummyTutor };

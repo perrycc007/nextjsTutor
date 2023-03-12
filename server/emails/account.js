@@ -7,9 +7,10 @@ const sendResetPasswordEmail = (email, link) => {
         to: email,
         from: 'perry2006@hotmail.com',
         subject: 'Reset your password!',
-        text: `To reset your password, click this link: ${link}`
+        html: resetPasswordTemplate(link)
     })
 }
+
 
 module.exports = {
     sendResetPasswordEmail
