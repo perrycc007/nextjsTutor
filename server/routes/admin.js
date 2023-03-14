@@ -31,4 +31,21 @@ router.patch("/toggleAvail", async (req, res) => {
   res.json({ result });
 });
 
+router.patch("/updateTutorVerify", async (req, res) => {
+  console.log(req.body.tutorid);
+  const tutorid = req.body.tutorid;
+  const verify = req.body.verify;
+  const result = await prisma.tutor.update({
+    where: {
+      tutorid: parseInt(tutorid),
+    },
+    data: {
+      verify: verify,
+    },
+  });
+  if (result.status == 200) {
+    res.json({ result });
+  }
+});
+
 module.exports = router;

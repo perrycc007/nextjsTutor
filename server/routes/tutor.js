@@ -1,7 +1,5 @@
-const bcrypt = require("bcrypt");
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
 const dummyTutor = require("../DUMMY/dummyTutor");
 
 const { PrismaClient } = require("@prisma/client");
@@ -12,6 +10,9 @@ const prisma = new PrismaClient();
 // GET /tasks?sortBy=createdAt:desc
 router.get("/", async (req, res) => {
   const result = await prisma.tutor.findMany({
+    where: {
+      status:'open'
+    },
     orderBy: [
       {
         lastOnline: "desc",
@@ -73,6 +74,7 @@ router.post("/", async (req, res) => {
     lowestfee: {
       gte: fee[0],
     },
+    status:'open'
   };
   if (fee[0] == null) {
     delete preference[("lowestfee", "highestfee")];
@@ -144,5 +146,7 @@ router.patch("/", async (req, res) => {
   // console.log(result)
   res.json({ result });
 });
+
+
 
 module.exports = router;

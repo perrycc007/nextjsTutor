@@ -8,6 +8,9 @@ const prisma = new PrismaClient();
 
 router.get("/", async (req, res) => {
   const result = await prisma.student.findMany({
+    where: {
+      status: "open",
+    },
     orderBy: [
       {
         lastOnline: "desc",
@@ -56,6 +59,7 @@ router.post("/", async (req, res) => {
     lowestfee: {
       gte: fee[0],
     },
+    status: "open",
   };
   if (fee[0] == null) {
     delete preference[("lowestfee", "highestfee")];

@@ -94,6 +94,7 @@ model tutor {
   matchedbefore        Json?
   status               String?   @default("open") @db.VarChar(45)
   lastOnline           DateTime? @db.DateTime(0)
+  verify               String?   @default("no") @db.VarChar(45)
   user                 user?     @relation(fields: [userid], references: [userid], onDelete: Restrict, map: "tutor_userid_key")
 
   @@index([userid], map: "tutor_userid_key_idx")
