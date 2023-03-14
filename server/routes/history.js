@@ -33,8 +33,18 @@ router.patch("/updateCaseStatus", async (req, res) => {
       status: status,
     },
   });
+  const resultmatch = await prisma.match.update({
+    where: {
+      studentid: parseInt(studentid),
+    },
+    data: {
+      status: status,
+    },
+  });
+
   if (result.status == 200);
   res.json({ result });
+  if (resultmatch.status == 200);
 });
 
 module.exports = router;

@@ -14,6 +14,7 @@ router.post("/tutor", async (req, res) => {
     highestfee: {
       gte: lowestfee,
     },
+    status: 'open'
   };
 
   if (lowestfee == null) {
@@ -76,7 +77,7 @@ router.post("/tutor", async (req, res) => {
     found1 = found1.map((info) => {
       return info.studentid;
     });
-    res.json(found1);
+    // res.json(found1);
     // get the student that the tutor had already matched
     const before = await prisma.tutor.findUnique({
       where: {
@@ -88,8 +89,8 @@ router.post("/tutor", async (req, res) => {
     if (before.matchedbefore !== null) {
       difference = before.matchedbefore.filter((x) => found1.indexOf(x) === -1);
     }
-    // get those id of students who are no longer match and set it has difference
-    console.log("difference", difference);
+    // get those id of students who are no longer match and set it as difference
+    // console.log("difference", difference);
     // get the list of those no longer is a match students
     const deletetutor = await prisma.match.findMany({
       where: {
@@ -101,12 +102,25 @@ router.post("/tutor", async (req, res) => {
     // for those who are no longer match, filter the tutorid from the avail list
     for (const people of deletetutor) {
       const availtutor = people.availtutor;
+      const checking = people.checking;
+      const checked = people.checked;
+      let nochecking = [];
+      let nochecked = [];
       let notavaillist = [];
       // filter this tutor id from the avail list
       let list = availtutor.filter((tutor) => tutor !== tutorid);
-      console.log("list", list);
+      let nocheckinglist = checking.filter((tutor) => tutor !== tutorid);
+      let nocheckedlist = checked.filter((tutor) => tutor !== tutorid);
+
+      // console.log("list", list);
       if (people.notavailtutor !== null) {
         notavaillist = people.notavailtutor;
+      }
+      if (people.checking !== null) {
+        nochecking = people.checking;
+      }
+      if (people.checked !== null) {
+        nochecked = people.checked;
       }
       // filter the tutorid if it is in the not avail list
       notavaillist = notavaillist.filter((id) => {
@@ -120,12 +134,14 @@ router.post("/tutor", async (req, res) => {
         data: {
           availtutor: list,
           notavailtutor: notavaillist,
+          checked: nocheckinglist,
+          checking: nocheckedlist,
         },
       });
       console.log(result);
     }
-    // after deleting those no longer existing user, we gonna update those new matching result
-    // find those matching row in the mathcing table of those mathced student
+    // after deleting those no longer matching user, we gonna update those new matching result
+    // find those matching row in the mathcing table of those matched student
     const student = await prisma.match.findMany({
       where: {
         studentid: {
@@ -148,7 +164,7 @@ router.post("/tutor", async (req, res) => {
     //
     const updateServer = async () => {
       for (const people of student) {
-        console.log(people.studentid);
+        // console.log(people.studentid);
         if (people.availtutor !== null) {
           let list = people.availtutor;
           let notavaillist = [];
@@ -166,7 +182,7 @@ router.post("/tutor", async (req, res) => {
               });
             }
           }
-          console.log("92", notavaillist);
+          // console.log("92", notavaillist);
           // update the mathcing table
           const result = await prisma.match.update({
             where: {
@@ -180,7 +196,7 @@ router.post("/tutor", async (req, res) => {
           console.log(result);
         } else {
           // if the availlist is null, directly update it
-          console.log(people.studentid);
+          // console.log(people.studentid);
           let list = [tutorid];
           console.log("105", list);
           const result = await prisma.match.update({
@@ -214,6 +230,9 @@ router.post("/student", async (req, res) => {
   const preference = {
     lowestfee: {
       lte: highestfee,
+    },
+    where:{
+      status: 'open'
     },
   };
   if (highestfee == null) {

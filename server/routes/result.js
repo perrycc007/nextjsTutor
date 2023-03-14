@@ -7,6 +7,9 @@ const prisma = new PrismaClient();
 router.get("/:page", async (req, res) => {
   const page = JSON.parse(req.params.page);
   const result = await prisma.match.findMany({
+    where:{
+      status: 'open'
+    },
     skip: page,
     take: 1,
   });
