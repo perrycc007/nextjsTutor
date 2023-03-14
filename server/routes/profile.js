@@ -27,8 +27,13 @@ router.get("/:userid", async (req, res) => {
 router.post("/", async (req, res) => {
   const reqUserid = parseInt(req.body.userid);
   let { userid, idprofile, ...information } = req.body.information;
+  let {availtime,country,lastOnline,...requiredInfo}=information
+  const isEmpty = Object.values(requiredInfo).some((x) => x == null || x == "");
+  if(isEmpty){
+    return res.status(400).send('請填寫所有格子');
+  }
   agreewith = information.agreewith;
-  console.log(reqUserid);
+  console.log(information);
   // userid = parseInt(req.body.userid);
   let date_ob = new Date();
   const result = await prisma.profile.upsert({
@@ -47,8 +52,8 @@ router.post("/", async (req, res) => {
       agreewith: `${agreewith}`,
     },
   });
-  console.log(result);
-  res.json({ result });
+  // console.log(result);
+  // res.json({ result });
 });
 
 module.exports = router;
