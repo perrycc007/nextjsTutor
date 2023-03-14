@@ -102,26 +102,26 @@ router.post("/tutor", async (req, res) => {
     // for those who are no longer match, filter the tutorid from the avail list
     for (const people of deletetutor) {
       const availtutor = people.availtutor;
-      const checking = people.checking;
-      const checked = people.checked;
-      let nochecking = [];
-      let nochecked = [];
+      // const checking = people.checking;
+      // const checked = people.checked;
+      // let nochecking = [];
+      // let nochecked = [];
       let notavaillist = [];
       // filter this tutor id from the avail list
       let list = availtutor.filter((tutor) => tutor !== tutorid);
-      let nocheckinglist = checking.filter((tutor) => tutor !== tutorid);
-      let nocheckedlist = checked.filter((tutor) => tutor !== tutorid);
+      // let nocheckinglist = checking.filter((tutor) => tutor !== tutorid);
+      // let nocheckedlist = checked.filter((tutor) => tutor !== tutorid);
 
       // console.log("list", list);
       if (people.notavailtutor !== null) {
         notavaillist = people.notavailtutor;
       }
-      if (people.checking !== null) {
-        nochecking = people.checking;
-      }
-      if (people.checked !== null) {
-        nochecked = people.checked;
-      }
+      // if (people.checking !== null) {
+      //   nochecking = people.checking;
+      // }
+      // if (people.checked !== null) {
+      //   nochecked = people.checked;
+      // }
       // filter the tutorid if it is in the not avail list
       notavaillist = notavaillist.filter((id) => {
         id !== tutorid;
@@ -134,8 +134,8 @@ router.post("/tutor", async (req, res) => {
         data: {
           availtutor: list,
           notavailtutor: notavaillist,
-          checked: nocheckinglist,
-          checking: nocheckedlist,
+          // checked: nocheckinglist,
+          // checking: nocheckedlist,
         },
       });
       console.log(result);
@@ -277,7 +277,7 @@ router.post("/student", async (req, res) => {
     found1 = found1.map((info) => {
       return info.tutorid;
     });
-    res.json(found1);
+    // res.json(found1);
 
     // find the mathcing row of the current student
     const student = await prisma.match.findUnique({
@@ -285,7 +285,7 @@ router.post("/student", async (req, res) => {
         studentid: parseInt(studentid),
       },
     });
-    console.log("241", student);
+    // console.log("241", student);
     let differenceToAdd = found1;
     // check the availtutor and find those are new to the list
     if ((student != null) | (student != [])) {
@@ -298,7 +298,7 @@ router.post("/student", async (req, res) => {
       differenceToAdd = found1.filter(
         (x) => beforeavailtutor.indexOf(x) === -1
       );
-      console.log("differenceToAdd", differenceToAdd);
+      // console.log("differenceToAdd", differenceToAdd);
       // find those tutor who are a matched but no longer is a match now, and try to delete this student id from the mathced before list
       const deletetutor = await prisma.tutor.findMany({
         where: {
@@ -307,16 +307,16 @@ router.post("/student", async (req, res) => {
           },
         },
       });
-      console.log("deletetutor", deletetutor);
+      // console.log("deletetutor", deletetutor);
       // delete the studentid in there matchedbefore list
       const updateServer = async () => {
         for (const people of deletetutor) {
           let matchedbefore = people.matchedbefore;
-          console.log("matchedbefore", matchedbefore);
+          // console.log("matchedbefore", matchedbefore);
           let list = [];
           if (matchedbefore !== null) {
             list = matchedbefore.filter((student) => student !== studentid);
-            console.log("list", list);
+            // console.log("list", list);
           }
           const result = await prisma.tutor.update({
             where: {
