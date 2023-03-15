@@ -231,9 +231,7 @@ router.post("/student", async (req, res) => {
     lowestfee: {
       lte: highestfee,
     },
-    where:{
       status: 'open'
-    },
   };
   if (highestfee == null) {
     delete preference["lowestfee"];

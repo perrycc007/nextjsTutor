@@ -27,10 +27,10 @@ router.get("/:userid", async (req, res) => {
 router.post("/", async (req, res) => {
   const reqUserid = parseInt(req.body.userid);
   let { userid, idprofile, ...information } = req.body.information;
-  let {availtime,country,lastOnline,...requiredInfo}=information
+  let { availtime, country, lastOnline, ...requiredInfo } = information;
   const isEmpty = Object.values(requiredInfo).some((x) => x == null || x == "");
-  if(isEmpty){
-    return res.status(400).send('請填寫所有格子');
+  if (isEmpty) {
+    return res.status(400).json({ message: "請填寫所有格子" });
   }
   agreewith = information.agreewith;
   console.log(information);
@@ -53,7 +53,7 @@ router.post("/", async (req, res) => {
     },
   });
   // console.log(result);
-  // res.json({ result });
+  res.json({ result });
 });
 
 module.exports = router;
