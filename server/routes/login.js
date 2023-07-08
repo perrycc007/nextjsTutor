@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
   else {
     let date_ob = new Date();
 
-    const update = await prisma.profile.update({
+    const update = await prisma.profile.updateMany({
       where: {
         userid: result.userid,
       },
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
         lastOnline: date_ob,
       },
     });
-    const updateStudent = await prisma.student.update({
+    const updateStudent = await prisma.student.updateMany({
       where: {
         userid: result.userid,
       },
@@ -42,7 +42,7 @@ router.post("/", async (req, res) => {
         lastOnline: date_ob,
       },
     });
-    const updateTutor = await prisma.tutor.update({
+    const updateTutor = await prisma.tutor.updateMany({
       where: {
         userid: result.userid,
       },
