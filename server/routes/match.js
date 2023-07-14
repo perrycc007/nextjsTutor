@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 router.post("/tutor", async (req, res) => {
   try {
     const { location, subject, lowestfee, tutorid } = req.body.information;
+
     const preference = {
       highestfee: {
         gte: lowestfee,
@@ -21,89 +22,19 @@ router.post("/tutor", async (req, res) => {
       delete preference["highestfee"];
     }
 
-    // Find students that match the tutor's criteria
-    const result = await prisma.student.findMany({ where: preference });
+    const students = await findMatchingStudents(location, subject, preference);
+    const found1Ids = students.map((student) => student.studentid);
 
-    let found = [];
-    if (result !== null) {
-      // Filter based on location
-      found =
-        location !== undefined
-          ? result.filter((key) =>
-              JSON.parse(key.location).some((item) => location.includes(item))
-            )
-          : result;
-    }
-
-    found = found.filter((element) => element !== undefined);
-
-    let found1 = found;
-    if (found !== [] && found !== undefined) {
-      // Filter based on subject
-      found1 =
-        subject !== undefined
-          ? found.filter((key) => {
-              if (
-                JSON.parse(key.subject) !== [] &&
-                JSON.parse(key.subject) !== null
-              ) {
-                return JSON.parse(key.subject).some((item) =>
-                  subject.includes(item)
-                );
-              }
-            })
-          : found;
-    }
-
-    found1 = found1.filter((element) => element !== undefined);
-
-    const found1Ids = found1.map((info) => info.studentid);
-
-    // Get the tutor's previous matches
     const before = await prisma.tutor.findUnique({
       where: {
         tutorid: tutorid,
       },
     });
-    console.log("b4", before);
-    let difference = [];
-    if (before.matchedbefore !== null) {
-      // Find the students who are no longer a match
-      difference = before.matchedbefore.filter((x) => !found1Ids.includes(x));
-    }
-    console.log("found", found1Ids);
-   
 
-    // Find the matching rows in the match table for the students who are no longer a match
-    const deletetutor = await prisma.match.findMany({
-      where: {
-        studentid: {
-          in: difference,
-        },
-      },
-    });
+    const difference = findDifference(before.matchedbefore, found1Ids);
+    await updateNotMatchingStudents(difference, tutorid);
 
-    // Remove the tutor ID from the availtutor list for the students who are no longer a match
-    for (const people of deletetutor) {
-      const availtutor = people.availtutor || [];
-      const notavaillist = people.notavailtutor || [];
-
-      const list = availtutor.filter((tutor) => tutor !== tutorid);
-      const notavaillistUpdated = notavaillist.filter((id) => id !== tutorid);
-
-      await prisma.match.update({
-        where: {
-          idmatch: people.idmatch,
-        },
-        data: {
-          availtutor: list,
-          notavailtutor: notavaillistUpdated,
-        },
-      });
-    }
-
-    // Find the matching rows in the match table for the new matching students
-    const student = await prisma.match.findMany({
+    const studentMatches = await prisma.match.findMany({
       where: {
         studentid: {
           in: found1Ids,
@@ -111,55 +42,9 @@ router.post("/tutor", async (req, res) => {
       },
     });
 
-    // Update the tutor's matchedbefore list with the new matching students
-    const tutorUpdateResult = await prisma.tutor.update({
-      where: {
-        tutorid: tutorid,
-      },
-      data: {
-        matchedbefore: found1Ids,
-      },
-    });
+    await updateTutorMatchedBefore(tutorid, found1Ids);
 
-    // Update the match table with the new availtutor list for the matching students
-    const updateServer = async () => {
-      for (const people of student) {
-        if (people.availtutor !== null) {
-          let list = people.availtutor || [];
-          let notavaillist = people.notavailtutor || [];
-
-          if (list.indexOf(tutorid) < 0) {
-            list = [...list, tutorid];
-          } else if (list.indexOf(tutorid) >= 0) {
-            notavaillist = notavaillist.filter((id) => id !== tutorid);
-          }
-
-          await prisma.match.update({
-            where: {
-              idmatch: people.idmatch,
-            },
-            data: {
-              availtutor: list,
-              notavailtutor: notavaillist,
-            },
-          });
-        } else {
-          let list = [tutorid];
-
-          await prisma.match.update({
-            where: {
-              idmatch: people.idmatch,
-            },
-            data: {
-              availtutor: list,
-              notavailtutor: [],
-            },
-          });
-        }
-      }
-    };
-
-    await updateServer();
+    await updateMatchingStudents(studentMatches, tutorid);
 
     res.status(200).json({ message: "Tutor profile updated successfully." });
   } catch (err) {
@@ -187,121 +72,30 @@ router.post("/student", async (req, res) => {
       delete preference["lowestfee"];
     }
 
-    // Find tutors that match the student's criteria
-    const result = await prisma.tutor.findMany({ where: preference });
+    const tutors = await findMatchingTutors(location, subject, preference);
+    const found1Ids = tutors.map((tutor) => tutor.tutorid);
 
-    let found = [];
-    if (result !== null) {
-      // Filter based on location
-      found =
-        location !== undefined
-          ? result.filter((key) =>
-              JSON.parse(key.location).some((item) => location.includes(item))
-            )
-          : result;
-    }
-
-    found = found.filter((element) => element !== undefined);
-
-    let found1 =
-      subject !== undefined
-        ? found.filter((key) =>
-            JSON.parse(key.subject).some((item) => subject.includes(item))
-          )
-        : found;
-
-    found1 = found1.filter((element) => element !== undefined);
-
-    const found1Ids = found1.map((info) => info.tutorid);
-
-    // Get the student's previous matches
     const student = await prisma.match.findUnique({
       where: {
         studentid: parseInt(studentid),
       },
     });
 
-    let differenceToAdd = found1Ids;
+    const difference = findDifference(student.availtutor, found1Ids);
 
-    if (student !== null) {
-      const beforeavailtutor = student.availtutor || [];
-      const difference = beforeavailtutor.filter((x) => !found1Ids.includes(x));
-      differenceToAdd = found1Ids.filter((x) => !beforeavailtutor.includes(x));
+    await updateNotMatchingTutors(difference, studentid);
 
-      // Find tutors who are no longer a match and update their matchedbefore list
-      const deletetutor = await prisma.tutor.findMany({
-        where: {
-          tutorid: {
-            in: difference,
-          },
-        },
-      });
-
-      const updateServer = async () => {
-        for (const people of deletetutor) {
-          let matchedbefore = [];
-          if (people.matchedbefore !== null && people.matchedbefore !== []) {
-            matchedbefore = people.matchedbefore;
-            matchedbefore = matchedbefore.filter(
-              (student) => student !== studentid
-            );
-          }
-
-          await prisma.tutor.update({
-            where: {
-              tutorid: people.tutorid,
-            },
-            data: {
-              matchedbefore: matchedbefore,
-            },
-          });
-        }
-      };
-
-      await updateServer();
-    }
-
-    // Update the matched students list for the new matching tutors
-    const updateTutor = await prisma.tutor.findMany({
+    const tutorMatches = await prisma.tutor.findMany({
       where: {
         tutorid: {
-          in: differenceToAdd,
+          in: found1Ids,
         },
       },
     });
 
-    for (const people of updateTutor) {
-      let matchedbefore = [];
-      if (people.matchedbefore !== null && people.matchedbefore !== []) {
-        matchedbefore = people.matchedbefore;
-        matchedbefore.push(studentid);
-      }
+    await updateStudentAvailTutors(studentid, found1Ids);
 
-      await prisma.tutor.update({
-        where: {
-          tutorid: people.tutorid,
-        },
-        data: {
-          matchedbefore: matchedbefore,
-        },
-      });
-    }
-
-    // Update the match table with the new availtutor list for the student
-    let notavailtutor = [];
-    if (student !== null) {
-      notavailtutor = student.notavailtutor || [];
-    }
-
-    await prisma.match.update({
-      where: {
-        studentid: studentid,
-      },
-      data: {
-        availtutor: found1Ids,
-        notavailtutor: notavailtutor,
-      },
-    });
+    await updateMatchingTutors(tutorMatches, studentid);
 
     res
       .status(200)
@@ -313,5 +107,212 @@ router.post("/student", async (req, res) => {
     });
   }
 });
+
+// Helper function to find matching students
+async function findMatchingStudents(location, subject, preference) {
+  const students = await prisma.student.findMany({ where: preference });
+
+  if (!students || students.length === 0) {
+    return [];
+  }
+
+  let found = students;
+  if (location !== undefined) {
+    found = students.filter((key) =>
+      JSON.parse(key.location).some((item) => location.includes(item))
+    );
+  }
+
+  let found1 = found;
+  if (found !== [] && found !== undefined) {
+    found1 =
+      subject !== undefined
+        ? found.filter((key) =>
+            JSON.parse(key.subject).some((item) => subject.includes(item))
+          )
+        : found;
+  }
+
+  return found1.filter(Boolean);
+}
+
+// Helper function to find matching tutors
+async function findMatchingTutors(location, subject, preference) {
+  const tutors = await prisma.tutor.findMany({ where: preference });
+
+  if (!tutors || tutors.length === 0) {
+    return [];
+  }
+
+  let found = tutors;
+  if (location !== undefined) {
+    found = tutors.filter((key) =>
+      JSON.parse(key.location).some((item) => location.includes(item))
+    );
+  }
+
+  let found1 =
+    subject !== undefined
+      ? found.filter((key) =>
+          JSON.parse(key.subject).some((item) => subject.includes(item))
+        )
+      : found;
+
+  return found1.filter(Boolean);
+}
+
+// Helper function to find the difference between two arrays
+function findDifference(array1, array2) {
+  return array1.filter((x) => !array2.includes(x));
+}
+
+// Helper function to update the matching table for not matching students
+async function updateNotMatchingStudents(difference, tutorid) {
+  const deletetutor = await prisma.match.findMany({
+    where: {
+      studentid: {
+        in: difference,
+      },
+    },
+  });
+
+  for (const people of deletetutor) {
+    const availtutor = people.availtutor || [];
+    const notavaillist = people.notavailtutor || [];
+
+    const list = availtutor.filter((tutor) => tutor !== tutorid);
+    const notavaillistUpdated = notavaillist.filter((id) => id !== tutorid);
+
+    await prisma.match.update({
+      where: {
+        idmatch: people.idmatch,
+      },
+      data: {
+        availtutor: list,
+        notavailtutor: notavaillistUpdated,
+      },
+    });
+  }
+}
+
+// Helper function to update the matching table for not matching tutors
+async function updateNotMatchingTutors(difference, studentid) {
+  const deletestudent = await prisma.tutor.findMany({
+    where: {
+      tutorid: {
+        in: difference,
+      },
+    },
+  });
+
+  for (const people of deletestudent) {
+    const matchedbefore = people.matchedbefore || [];
+
+    const list = matchedbefore.filter((student) => student !== studentid);
+
+    await prisma.tutor.update({
+      where: {
+        tutorid: people.tutorid,
+      },
+      data: {
+        matchedbefore: list,
+      },
+    });
+  }
+}
+
+// Helper function to update the matchedbefore list for the tutor
+async function updateTutorMatchedBefore(tutorid, matchedStudents) {
+  await prisma.tutor.update({
+    where: {
+      tutorid: tutorid,
+    },
+    data: {
+      matchedbefore: matchedStudents,
+    },
+  });
+}
+
+// Helper function to update the matching table for matching students
+async function updateMatchingStudents(studentMatches, tutorid) {
+  for (const student of studentMatches) {
+    if (student.availtutor !== null) {
+      let list = student.availtutor || [];
+      let notavaillist = student.notavailtutor || [];
+
+      if (!list.includes(tutorid)) {
+        list = [...list, tutorid];
+      } else if (list.includes(tutorid) && notavaillist.includes(tutorid)) {
+        notavaillist = notavaillist.filter((id) => id !== tutorid);
+      }
+
+      await prisma.match.update({
+        where: {
+          idmatch: student.idmatch,
+        },
+        data: {
+          availtutor: list,
+          notavailtutor: notavaillist,
+        },
+      });
+    } else {
+      const list = [tutorid];
+
+      await prisma.match.update({
+        where: {
+          idmatch: student.idmatch,
+        },
+        data: {
+          availtutor: list,
+          notavailtutor: [],
+        },
+      });
+    }
+  }
+}
+
+// Helper function to update the availtutor list for the student
+async function updateStudentAvailTutors(studentid, availTutors) {
+  const student = await prisma.match.findUnique({
+    where: {
+      studentid: studentid,
+    },
+  });
+
+  let notavailtutor = [];
+  if (student !== null) {
+    notavailtutor = student.notavailtutor || [];
+  }
+
+  await prisma.match.update({
+    where: {
+      studentid: studentid,
+    },
+    data: {
+      availtutor: availTutors,
+      notavailtutor: notavailtutor,
+    },
+  });
+}
+
+// Helper function to update the matched students list for matching tutors
+async function updateMatchingTutors(tutorMatches, studentid) {
+  for (const tutor of tutorMatches) {
+    let matchedbefore = [];
+    if (tutor.matchedbefore !== null && tutor.matchedbefore !== []) {
+      matchedbefore = tutor.matchedbefore;
+      matchedbefore.push(studentid);
+    }
+
+    await prisma.tutor.update({
+      where: {
+        tutorid: tutor.tutorid,
+      },
+      data: {
+        matchedbefore: matchedbefore,
+      },
+    });
+  }
+}
 
 module.exports = router;
