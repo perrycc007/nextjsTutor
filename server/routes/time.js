@@ -4,7 +4,9 @@ const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-router.get("/", async (req, res) => {
+router.get("/", 
+// authenticateToken,
+ async (req, res) => {
   const userid = req.body.userid;
   const result = await prisma.profile.findMany({
     where: {
