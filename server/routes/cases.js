@@ -36,6 +36,11 @@ router.post("/getFavouriteCase/:userid", async (req, res) => {
     where: {
       studentid: { in: caseidList },
     },
+    orderBy: [
+      {
+        lastOnline: "desc",
+      },
+    ],
   });
   res.json({ result });
 });

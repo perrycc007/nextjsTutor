@@ -10,6 +10,12 @@ router.get("/:page", async (req, res) => {
     // where:{
     //   status: 'open'
     // },
+
+    orderBy: [
+      {
+        lastOnline: "desc",
+      },
+    ],
     skip: page,
     take: 1,
   });
@@ -48,6 +54,11 @@ router.get("/:page", async (req, res) => {
               in: match.availtutor,
             },
           },
+          orderBy: [
+            {
+              lastOnline: "desc",
+            },
+          ],
         });
         // console.log('tutor',tutor)
         for (let teahcer of tutor) {
@@ -116,6 +127,11 @@ router.get("/studentid/:studentid", async (req, res) => {
           tutorid: {
             in: match.availtutor,
           },
+          orderBy: [
+            {
+              lastOnline: "desc",
+            },
+          ],
         },
       });
       // console.log('tutor',tutor)
